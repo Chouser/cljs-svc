@@ -972,6 +972,17 @@ goog.require = function(rule){Packages.clojure.lang.RT[\"var\"](\"cljs.compiler\
             (eval1 repl-env env r)
             (recur (read pbr false eof false))))))))
 
+(defn load-stream-vars [stream]
+  (with-open [r (io/reader stream)]
+    (let [env {:ns (@namespaces *cljs-ns*) :context :statement :locals {}}
+          pbr (clojure.lang.LineNumberingPushbackReader. r)
+          eof (Object.)]
+      (loop [r (read pbr false eof false)]
+        (let [env (assoc env :ns (@namespaces *cljs-ns*))]
+          (when-not (identical? eof r)
+            (analyze env r)
+            (recur (read pbr false eof false))))))))
+
 #_(defn load-file
   [repl-env f]
   (binding [*cljs-ns* 'cljs.user]
@@ -980,6 +991,13 @@ goog.require = function(rule){Packages.clojure.lang.RT[\"var\"](\"cljs.compiler\
       (.put ^javax.script.ScriptEngine (:jse repl-env)
             javax.script.ScriptEngine/FILENAME f)
       (load-stream repl-env res))))
+
+(defn load-file-vars
+  [f]
+  (binding [*cljs-ns* 'cljs.user]
+    (let [res (if (= \/ (first f)) f (io/resource f))]
+      (assert res (str "Can't find " f " in classpath"))
+      (load-stream-vars res))))
 
 (def loaded-libs (atom #{}))
 

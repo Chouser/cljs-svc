@@ -1,4 +1,5 @@
 (ns cljs-svc.core
+  (:refer-clojure :exclude [compile])
   (:import java.io.StringReader)
   (:use [ring.adapter.jetty :as raj]
         [ring.middleware.keyword-params :only (wrap-keyword-params)]
@@ -35,9 +36,12 @@
              (catch Throwable e
                (if (= (.getMessage e) "EOF while reading")
                  ["incomplete"]
-                 ["err" (with-out-str (clojure.repl/pst))]))))})
+                 ["err" (with-out-str
+                          (binding [*err* *out*] (clojure.repl/pst e)))]))))})
 
 (def app (wrap-params (wrap-keyword-params cljs-svc)))
+
+(comp/load-file-vars "cljs_/core.cljs")
 
 (defn -main []
   (let [port (Integer/parseInt (System/getenv "PORT"))]
