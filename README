@@ -1,0 +1,16 @@
+# cljs-svc
+
+A web service for compiling ClojureScript to JavaScript.
+
+## Usage
+
+This is a heroku web app.  Start is like this:
+
+    $ gem install foreman
+    $ foreman start
+
+## License
+
+Copyright (C) 2010 Chris Houser
+
+Distributed under the Eclipse Public License, the same as Clojure.
