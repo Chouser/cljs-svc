@@ -1,11 +1,44 @@
 (ns cljs-svc.core
-  (:use ring.adapter.jetty))
+  (:import java.io.StringReader)
+  (:use [ring.adapter.jetty :as raj]
+        [ring.middleware.keyword-params :only (wrap-keyword-params)]
+        [ring.middleware.params :only (wrap-params)]
+        [clojure.repl :as repl :only ()]
+        [cljs.compiler :as comp :only ()]))
 
-(defn app [req]
+(defn compile [cljs]
+  (let [reader (java.io.PushbackReader. (StringReader. cljs))]
+    (->> (repeatedly
+           #(let [f (read reader false reader false)]
+              (when-not (identical? f reader)
+                (comp/emits
+                  (comp/analyze {:ns (@comp/namespaces 'cljs.user)
+                                 :context :expr
+                                 :loclas {}} f)))))
+         (take-while identity)
+         (apply str))))
+
+(defn -tojs [this cljs]
+  (try
+    ["js" (compile cljs)]
+    (catch Throwable e
+      (if (= (.getMessage e) "EOF while reading")
+        ["incomplete"]
+        ["err" (with-out-str (clojure.repl/pst))]))))
+
+(defn cljs-svc [req]
   {:status 200
    :headers {"Content-Type" "text/plain"}
-   :body "Hello, world"})
+   :body (pr-str
+           (try
+             ["js" (compile (:form (:params req)))]
+             (catch Throwable e
+               (if (= (.getMessage e) "EOF while reading")
+                 ["incomplete"]
+                 ["err" (with-out-str (clojure.repl/pst))]))))})
+
+(def app (wrap-params (wrap-keyword-params cljs-svc)))
 
 (defn -main []
   (let [port (Integer/parseInt (System/getenv "PORT"))]
-    (run-jetty app {:port port})))
+    (raj/run-jetty app {:port port})))

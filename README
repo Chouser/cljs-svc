@@ -9,7 +9,7 @@ This is a heroku web app.  Start is like this:
     gem install foreman
     foreman start
 
-Update ClojureScript subdir by:
+If you want a newer version of ClojureScript:
 
     git pull -s subtree clojurescript master
 
