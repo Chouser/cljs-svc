@@ -933,7 +933,7 @@ goog.require = function(rule){Packages.clojure.lang.RT[\"var\"](\"cljs.compiler\
         (set? form) (analyze-set env form name)
         :else {:op :constant :env env :form form}))))
 
-(defn eval1
+#_(defn eval1
   [repl-env env form]
   (try
     (let [ast (analyze env form)
@@ -961,7 +961,7 @@ goog.require = function(rule){Packages.clojure.lang.RT[\"var\"](\"cljs.compiler\
       (.printStackTrace ex)
       (println (str ex)))))
 
-(defn load-stream [repl-env stream]
+#_(defn load-stream [repl-env stream]
   (with-open [r (io/reader stream)]
     (let [env {:ns (@namespaces *cljs-ns*) :context :statement :locals {}}
           pbr (clojure.lang.LineNumberingPushbackReader. r)
@@ -972,7 +972,7 @@ goog.require = function(rule){Packages.clojure.lang.RT[\"var\"](\"cljs.compiler\
             (eval1 repl-env env r)
             (recur (read pbr false eof false))))))))
 
-(defn load-file
+#_(defn load-file
   [repl-env f]
   (binding [*cljs-ns* 'cljs.user]
     (let [res (if (= \/ (first f)) f (io/resource f))]
@@ -983,7 +983,7 @@ goog.require = function(rule){Packages.clojure.lang.RT[\"var\"](\"cljs.compiler\
 
 (def loaded-libs (atom #{}))
 
-(defn goog-require [repl-env rule]
+#_(defn goog-require [repl-env rule]
   (when-not (contains? @loaded-libs rule)
     (let [jse ^javax.script.ScriptEngine (:jse repl-env)
           path (string/replace (munge rule) \. java.io.File/separatorChar)
@@ -997,7 +997,7 @@ goog.require = function(rule){Packages.clojure.lang.RT[\"var\"](\"cljs.compiler\
           (throw (Exception. (str "Cannot find " cljs-path " or " js-path " in classpath")))))
       (swap! loaded-libs conj rule))))
 
-(defn repl-env
+#_(defn repl-env
   "Returns a fresh JS environment, suitable for passing to repl.
   Hang on to return for use across repl calls."
   []
@@ -1017,7 +1017,7 @@ goog.require = function(rule){Packages.clojure.lang.RT[\"var\"](\"cljs.compiler\
       (.eval jse line))
     new-repl-env))
 
-(defn repl
+#_(defn repl
   "Note - repl will reload core.cljs every time, even if supplied old repl-env"
   [repl-env & {:keys [verbose warn-on-undeclared]}]
   (prn "Type: " :cljs/quit " to quit")
@@ -1069,7 +1069,7 @@ goog.require = function(rule){Packages.clojure.lang.RT[\"var\"](\"cljs.compiler\
   [file-str]
   (clojure.string/replace file-str #".cljs$" ".js"))
 
-(defn compile-file
+#_(defn compile-file
   "Compiles src to a file of the same name, but with a .js extension,
    in the src file's directory.
 
@@ -1158,7 +1158,7 @@ goog.require = function(rule){Packages.clojure.lang.RT[\"var\"](\"cljs.compiler\
   (let [state (reduce (fn [m next] (assoc m (:ns next) next)) {} coll)]
     (:order (reduce dependency-order-visit (assoc state :order []) (map :ns coll)))))
 
-(defn compile-root
+#_(defn compile-root
   "Looks recursively in src-dir for .cljs files and compiles them to
    .js files. If target-dir is provided, output will go into this
    directory mirroring the source directory structure. Returns a list
