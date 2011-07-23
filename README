@@ -6,8 +6,12 @@ A web service for compiling ClojureScript to JavaScript.
 
 This is a heroku web app.  Start is like this:
 
-    $ gem install foreman
-    $ foreman start
+    gem install foreman
+    foreman start
+
+Update ClojureScript subdir by:
+
+    git pull -s subtree clojurescript master
 
 ## License
 
